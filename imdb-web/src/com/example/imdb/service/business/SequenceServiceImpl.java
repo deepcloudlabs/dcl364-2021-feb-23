@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import com.example.imdb.aspects.Profile;
 import com.example.imdb.service.SequenceService;
 
 /**
@@ -16,6 +17,7 @@ import com.example.imdb.service.SequenceService;
 // CDI Bean
 @Named
 @Singleton
+@Profile
 public class SequenceServiceImpl implements SequenceService {
 	private Map<String, AtomicLong> sequences = new ConcurrentHashMap<String, AtomicLong>();
 

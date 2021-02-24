@@ -11,6 +11,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import com.example.imdb.aspects.Audit;
+import com.example.imdb.aspects.Profile;
 import com.example.imdb.entity.Director;
 import com.example.imdb.entity.Genre;
 import com.example.imdb.entity.Movie;
@@ -25,6 +27,8 @@ import com.example.imdb.service.SequenceService;
  */
 @Named // CDI Bean -> CDI Component
 @Singleton 
+@Audit
+@Profile
 /*
 Other scopes:
 @SessionScoped
