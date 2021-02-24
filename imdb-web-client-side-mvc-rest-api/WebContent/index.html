@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Imdb Search Page</title>
+    <style type="text/css">
+        @import url('/imdb-api/css/bootstrap.css');
+        @import url('/imdb-api/css/bootstrap-theme.css');
+    </style>
+    <script type="text/javascript" src="/imdb-api/js/jquery-1.11.3.js"></script>
+    <script type="text/javascript" src="/imdb-api/js/bootstrap.js"></script>
+    <script type="text/javascript" src="/imdb-api/js/knockout-3.4.0.js"></script>
+    <script type="text/javascript" src="/imdb-api/js/model.js"></script>
+</head>
+<body>
+	    <p />
+    <div class="container">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">Search Panel</h3>
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label for="genre">Genre:</label>
+                    <select id="genre"
+                           data-bind="options: genres, value: genre, optionsText: 'name', optionsValue: 'name'"
+                           class="form-control">
+                    </select>       
+                </div>
+                <div class="form-group">
+                    <label for="fromYear">From Year:</label>
+                    <input id="fromYear"
+                           data-bind="value: fromYear"
+                           type="text"
+                           class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="toYear">To Year:</label>
+                    <input id="toYear"
+                           data-bind="value: toYear"
+                           type="text"
+                           class="form-control" />
+                </div>
+                <div class="form-group">
+                  <button data-bind="click: search" class="btn btn-success">Search</button>
+                </div>
+             </div>
+        </div>   
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">Search Result</h3>
+            </div>
+            <div class="panel-body">
+                <table class="table table-striped table-hover">
+                <thead>
+			  		<tr>
+			  			<th>Title</th>
+			  			<th>Year</th>
+			  			<th>IMDB</th>
+			  		</tr>
+			  		</thead>
+			  		<tbody data-bind="foreach: {data: movies, as: 'movie'}">
+					<tr>
+  		   				<td data-bind="text: movie.title"></td>
+  		   				<td data-bind="text: movie.year"></td>
+  		   				<td><a data-bind="attr: { href: 'http://www.imdb.com/title/'+ movie.imdb}" target="_blank">Visit me!</a></td>
+  		   </tr>	  		
+			  		</tbody>                
+                </table>
+            </div>
+        </div>
+   </div>             	
+</body>
+</html>
