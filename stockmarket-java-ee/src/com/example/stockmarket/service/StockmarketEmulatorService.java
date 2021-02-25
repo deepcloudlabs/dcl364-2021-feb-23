@@ -7,6 +7,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import com.example.stockmarket.application.StockMarketApplication;
+import com.example.stockmarket.entity.Stock;
 
 @Stateless
 public class StockmarketEmulatorService {
@@ -17,8 +18,9 @@ public class StockmarketEmulatorService {
 	public void updateStockPricesRandomly() {
 		stockMarketApp.findStocks(0, 10)
 		              .forEach( stock -> {
-						 stock.setPrice( getRandomPrice(stock.getPrice()) );
-						 stockMarketApp.update(stock);
+		            	 var updatedStock = new Stock(stock); 
+		            	 updatedStock.setPrice( getRandomPrice(stock.getPrice()) );
+						 stockMarketApp.update(updatedStock);
 		              });  
 	}
 

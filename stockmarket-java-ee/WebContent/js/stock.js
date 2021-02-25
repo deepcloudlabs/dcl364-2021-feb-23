@@ -34,11 +34,12 @@ class StockViewModel {
                 symbol: e.symbol,
                 description: this.stockLookup[e.symbol].description,
                 company: this.stockLookup[e.symbol].company,
-                price: e.oldPrice.toFixed(2),
-                newPrice: e.newPrice.toFixed(2)
+                price: e.oldPrice.toFixed(3),
+                newPrice: e.newPrice.toFixed(3)
             };
             let stocks = this.stocks().filter(source => source.symbol != e.symbol);
             stocks.push(stock);
+    		this.stocks([]);
 			this.stocks(stocks);
         };
         // SSE

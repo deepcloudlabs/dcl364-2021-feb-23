@@ -16,10 +16,8 @@ import com.example.stockmarket.validation.StockSymbol;
 // Bean Validation -> Constraint
 @Entity
 @Table(name = "stocks")
-@NamedQueries({
-	@NamedQuery(name = "Stock.findAll", query = "select s from Stock s"),
-	@NamedQuery(name = "Stock.findAllByCompany", query = "select s from Stock s where s.company=:company")
-})
+@NamedQueries({ @NamedQuery(name = "Stock.findAll", query = "select s from Stock s"),
+		@NamedQuery(name = "Stock.findAllByCompany", query = "select s from Stock s where s.company=:company") })
 public class Stock {
 	@Id
 	@StockSymbol
@@ -32,6 +30,20 @@ public class Stock {
 	private double price;
 
 	public Stock() {
+	}
+
+	public Stock(Stock stock) {
+		this.symbol = stock.symbol;
+		this.company = stock.company;
+		this.price = stock.price;
+		this.description = stock.description;
+	}
+
+	public Stock(String symbol, String description, @NotEmpty String company, @Min(0) double price) {
+		this.symbol = symbol;
+		this.description = description;
+		this.company = company;
+		this.price = price;
 	}
 
 	public String getSymbol() {
