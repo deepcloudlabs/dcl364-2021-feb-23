@@ -24,7 +24,6 @@ public class Stock {
 	@Id
 	@StockSymbol
 	private String symbol;
-	@Column(name = "desc")
 	private String description;
 	@NotEmpty
 	private String company;

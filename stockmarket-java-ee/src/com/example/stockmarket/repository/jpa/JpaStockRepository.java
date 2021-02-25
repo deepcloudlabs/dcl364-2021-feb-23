@@ -1,6 +1,7 @@
 package com.example.stockmarket.repository.jpa;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Future;
 
@@ -42,23 +43,32 @@ public class JpaStockRepository implements StockRepository {
 
 	@Override
 	@Transactional
-	public Stock update(Stock entity) {
-		// TODO Auto-generated method stub
-		return null;
+	public Stock update(Stock stock) {
+		var symbol = stock.getSymbol();
+		var managedStock = entityManager.find(Stock.class, symbol);
+		if (Objects.isNull(managedStock))
+			throw new IllegalArgumentException("Cannot find stock to update");
+		managedStock.setPrice(stock.getPrice());
+		managedStock.setDescription(stock.getDescription());
+		managedStock.setCompany(stock.getCompany());
+		// entityManager.merge(managedStock);
+		return managedStock;
 	}
 
 	@Override
 	@Transactional
-	public Stock removeById(String key) {
-		// TODO Auto-generated method stub
-		return null;
+	public Stock removeById(String symbol) {
+		var managedStock = entityManager.find(Stock.class, symbol);
+		if (Objects.isNull(managedStock))
+			throw new IllegalArgumentException("Cannot find stock to remove");
+		entityManager.remove(managedStock);
+		return managedStock;
 	}
 
 	@Override
 	@Transactional
-	public Stock remove(Stock entity) {
-		// TODO Auto-generated method stub
-		return null;
+	public Stock remove(Stock stock) {
+		return this.removeById(stock.getSymbol());
 	}
 
 	@Override
