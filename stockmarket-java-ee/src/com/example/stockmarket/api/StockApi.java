@@ -1,9 +1,13 @@
 package com.example.stockmarket.api;
 
+import java.util.UUID;
+
 import javax.annotation.Resource;
 import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import javax.json.Json;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -16,9 +20,15 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.sse.OutboundSseEvent;
+import javax.ws.rs.sse.Sse;
+import javax.ws.rs.sse.SseBroadcaster;
+import javax.ws.rs.sse.SseEventSink;
 
 import com.example.stockmarket.application.StockMarketApplication;
+import com.example.stockmarket.application.events.StockPriceChangedEvent;
 import com.example.stockmarket.entity.Stock;
 import com.example.stockmarket.validation.StockSymbol;
 
@@ -29,6 +39,25 @@ public class StockApi {
 	private StockMarketApplication stockMarketApp;
 	@Resource // (2)
 	private ManagedExecutorService managedExecutorService;
+	
+	// SSE Configuration
+	private Sse sse;
+	private SseBroadcaster sseBroadcaster;
+	private OutboundSseEvent.Builder eventBuilder;
+	
+	@Context
+	public void setSse(Sse sse) {
+		this.sse = sse;
+		this.sseBroadcaster = sse.newBroadcaster();
+		this.eventBuilder = sse.newEventBuilder();
+	}
+
+	@GET
+	@Path("subscribe")
+	@Produces(MediaType.SERVER_SENT_EVENTS)
+	public void listen(@Context SseEventSink sseEventSink) {
+		this.sseBroadcaster.register(sseEventSink);
+	}
 	
 	// http://localhost:8100/stockmarket/api/v1/stocks/ORCL
 	@GET
@@ -60,20 +89,35 @@ public class StockApi {
 	}
 	
 	@PUT
-	@Path("{symbol}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Stock updateStock(
-			@PathParam("symbol") @Valid @StockSymbol String symbol, 
-			@Valid Stock stock) {
+	public Stock updateStock(@Valid Stock stock) {
 		return stockMarketApp.update(stock);
+	}
+	
+	public void listenStockPriceChanges(@Observes StockPriceChangedEvent event) {
+		var json = Json.createObjectBuilder()
+		    .add("symbol", event.getSymbol())
+		    .add("oldPrice", event.getOldPrice())
+		    .add("newPrice", event.getNewPrice())
+		    .build()
+		    .toString();
+		var sseEvent = 
+				eventBuilder.name("stockPriceChangedEvent")
+				            .id(UUID.randomUUID().toString())
+				            .mediaType(MediaType.APPLICATION_JSON_TYPE)
+				            .data(json)
+				            .reconnectDelay(3000)
+				            .comment("price changed")
+				            .build();
+		sseBroadcaster.broadcast(sseEvent);
+	
 	}
 	
 	@DELETE
 	@Path("{symbol}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Stock removeStock(
-			@PathParam("symbol") @Valid @StockSymbol String symbol) {
+	public Stock removeStock(@PathParam("symbol") @Valid @StockSymbol String symbol) {
 		return stockMarketApp.remove(symbol);
 	}
 }

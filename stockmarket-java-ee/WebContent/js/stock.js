@@ -14,6 +14,38 @@ class StockViewModel {
                 price: Number(this.price())
             });
         };
+         // Websocket
+        this.wsBase = 'ws://localhost:8080/stockmarket/changes';
+        this.websocket = new WebSocket(this.wsBase);
+
+        this.websocket.onopen = () => {
+            console.log('Connected!');
+            $.ajax({
+                method: 'GET',
+                url: 'http://localhost:8080/stockmarket/api/v1/stocks?page=0&size=25',
+                success: (stocks) => {
+                    stocks.forEach(stock => this.stockLookup[stock.symbol] = stock);
+                }
+            });
+        }
+        this.websocket.onmessage = (event) => {
+            let e = JSON.parse(event.data);
+            let stock = {
+                symbol: e.symbol,
+                description: this.stockLookup[e.symbol].description,
+                company: this.stockLookup[e.symbol].company,
+                price: e.oldPrice.toFixed(2),
+                newPrice: e.newPrice.toFixed(2)
+            };
+            let stocks = this.stocks().filter(source => source.symbol != e.symbol);
+            stocks.push(stock);
+			this.stocks(stocks);
+        };
+        // SSE
+        this.eventSource = new EventSource("http://localhost:8080/stockmarket/api/v1/stocks/subscribe");
+        this.eventSource.addEventListener("stockPriceChangedEvent", (event) => {
+          console.log(event)
+        });
     }
    findStock() {
         $.ajax({

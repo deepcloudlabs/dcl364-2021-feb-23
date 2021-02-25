@@ -7,10 +7,13 @@ import java.util.concurrent.Future;
 
 import javax.ejb.AsyncResult;
 import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
+import com.example.stockmarket.application.events.StockPriceChangedEvent;
 import com.example.stockmarket.entity.Stock;
 import com.example.stockmarket.repository.StockRepository;
 
@@ -18,6 +21,8 @@ import com.example.stockmarket.repository.StockRepository;
 public class JpaStockRepository implements StockRepository {
 	@PersistenceContext(unitName = "stockmarketPU")
 	private EntityManager entityManager;
+	@Inject
+	private Event<StockPriceChangedEvent> event;
 	
 	@Override
 	public Optional<Stock> findOne(String symbol) {
@@ -48,10 +53,13 @@ public class JpaStockRepository implements StockRepository {
 		var managedStock = entityManager.find(Stock.class, symbol);
 		if (Objects.isNull(managedStock))
 			throw new IllegalArgumentException("Cannot find stock to update");
+		var stockEvent = new StockPriceChangedEvent(
+				symbol, managedStock.getPrice(), stock.getPrice());
 		managedStock.setPrice(stock.getPrice());
 		managedStock.setDescription(stock.getDescription());
 		managedStock.setCompany(stock.getCompany());
-		// entityManager.merge(managedStock);
+		entityManager.merge(managedStock);
+		event.fire(stockEvent);
 		return managedStock;
 	}
 
