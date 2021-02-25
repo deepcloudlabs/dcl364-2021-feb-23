@@ -15,7 +15,7 @@ import com.example.stockmarket.repository.StockRepository;
 
 @Stateless
 public class JpaStockRepository implements StockRepository {
-	@PersistenceContext
+	@PersistenceContext(unitName = "stockmarketPU")
 	private EntityManager entityManager;
 	
 	@Override
