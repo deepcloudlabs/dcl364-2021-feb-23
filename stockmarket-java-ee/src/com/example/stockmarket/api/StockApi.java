@@ -41,6 +41,7 @@ public class StockApi {
 	private ManagedExecutorService managedExecutorService;
 	
 	// SSE Configuration
+	@SuppressWarnings("unused")
 	private Sse sse;
 	private SseBroadcaster sseBroadcaster;
 	private OutboundSseEvent.Builder eventBuilder;
