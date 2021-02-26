@@ -3,6 +3,7 @@ package com.example.crm.service.business;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,12 +11,16 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.crm.entity.Customer;
 import com.example.crm.repository.CustomerRepository;
 import com.example.crm.service.CustomerService;
+import com.example.crm.service.events.CustomerAcquiredEvent;
 
 @Service
 public class StandardCustomerService implements CustomerService {
 
 	@Autowired
 	private CustomerRepository customerRepository;
+	
+	@Autowired
+	private ApplicationEventPublisher publisher;
 	
 	@Override
 	public Customer findById(String identity) {
@@ -37,6 +42,8 @@ public class StandardCustomerService implements CustomerService {
 		var identity = customer.getIdentity();
 		if (customerRepository.existsById(identity ))
 			throw new IllegalArgumentException("Customer already exists.");
+		var event = new CustomerAcquiredEvent(identity,customer.getEmail());
+		publisher.publishEvent(event);
 		return customerRepository.save(customer);
 	}
 
